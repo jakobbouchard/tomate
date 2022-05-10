@@ -11,13 +11,17 @@
     "version": "0.1.0"
   },
   "tauri": {
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    },
     "allowlist": {
       "all": true
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+      "category": "Productivity",
+      "copyright": "Jakob Bouchard",
       "deb": {
         "depends": []
       },
@@ -29,7 +33,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "dev.jakobbouchard.tomate",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -39,7 +43,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "A simple Pomodoro timer.",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -56,10 +60,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 768,
         "resizable": true,
         "title": "Tomate",
-        "width": 800
+        "width": 1024
       }
     ]
   }
