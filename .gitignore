@@ -11,10 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-src-tauri/target
 
 # Editor directories and files
-.nova
 .vscode/*
 !.vscode/extensions.json
 .idea
