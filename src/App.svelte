@@ -1,61 +1,94 @@
 <script lang="ts">
-	import logo from './assets/svelte.png';
+	import { onMount } from 'svelte';
+	import {
+		isPermissionGranted,
+		requestPermission,
+		sendNotification,
+		type Permission
+	} from '@tauri-apps/api/notification';
+	import './app.css';
+
+	let permission: Permission;
+
+	onMount(async () => {
+		const permissionGranted = await isPermissionGranted();
+		if (!permissionGranted) {
+			permission = await requestPermission();
+		}
+	});
+
+	const buttons = [
+		{
+			value: 10,
+			display: '10 seconds'
+		},
+		{
+			value: 900,
+			display: '15 minutes',
+			default: true
+		},
+		{
+			value: 1800,
+			display: '30 minutes'
+		},
+		{
+			value: 3600,
+			display: '60 minutes'
+		}
+	];
+
+	let selectedButton = buttons.find((b) => b.default);
+	let time = selectedButton.value;
+	let timerStart = false;
+
+	$: effect = {
+		subscribe: () => {
+			const interval = setInterval(async () => {
+				if (timerStart) {
+					if (time > 0) {
+						time--;
+					} else if (time === 0) {
+						if (permission === 'granted') {
+							sendNotification({
+								title: 'Time’s up!',
+								body: '🎉 Congrats on completing a session!'
+							});
+						}
+						clearInterval(interval);
+					}
+				}
+			}, 1000);
+			return () => clearInterval(interval);
+		}
+	};
+	$: $effect;
+
+	const toggleTimer = () => (timerStart = !timerStart);
+
+	const triggerResetDialog = async () => {
+		time = selectedButton.value;
+		timerStart = false;
+	};
 </script>
 
 <main>
-	<img src={logo} alt="Svelte Logo" />
-	<h1>Hello world!</h1>
-
+	<h1>Tomate</h1>
+	<h2>
+		{`${Math.floor(time / 60) < 10 ? `0${Math.floor(time / 60)}` : `${Math.floor(time / 60)}`}:${
+			time % 60 < 10 ? `0${time % 60}` : time % 60
+		}`}
+	</h2>
 	<p>
-		Visit <a href="https://svelte.dev">svelte.dev</a> to learn how to build Svelte apps.
+		<button on:click={toggleTimer}>{!timerStart ? 'Start' : 'Pause'}</button>
+		<button on:click={triggerResetDialog}>Reset</button>
 	</p>
-
-	<p>
-		Check out <a href="https://github.com/sveltejs/kit#readme">SvelteKit</a> for the officially supported
-		framework, also powered by Vite!
-	</p>
+	{#each buttons as button}
+		<button
+			on:click={() => {
+				selectedButton = button;
+				time = selectedButton.value;
+				timerStart = true;
+			}}>{button.display}</button
+		>
+	{/each}
 </main>
-
-<style>
-	:root {
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-			'Open Sans', 'Helvetica Neue', sans-serif;
-	}
-
-	main {
-		text-align: center;
-		padding: 1em;
-		margin: 0 auto;
-	}
-
-	img {
-		height: 16rem;
-		width: 16rem;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4rem;
-		font-weight: 100;
-		line-height: 1.1;
-		margin: 2rem auto;
-		max-width: 14rem;
-	}
-
-	p {
-		max-width: 14rem;
-		margin: 1rem auto;
-		line-height: 1.35;
-	}
-
-	@media (min-width: 480px) {
-		h1 {
-			max-width: none;
-		}
-
-		p {
-			max-width: none;
-		}
-	}
-</style>
